@@ -94,6 +94,3 @@ streamlit run app.py
 ---
 Данный проект предназначен для упрощения обработки Excel данных и интеграции возможностей LLM для анализа и преобразования табличных данных.
 ```
-
-(filepath: /c:/deepseek_excel/Readme.md)
-(filepath: /c:/deepseek_excel/Readme.md)
