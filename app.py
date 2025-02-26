@@ -331,7 +331,7 @@ def main():
                 target_column = st.selectbox(
                     "Целевой столбец для обработки", 
                     df.columns,
-                    index=df.columns.get_indexer([suggested_target_columns[0]])[0] if suggested_target_columns else 0,
+                    index=int(df.columns.get_indexer([suggested_target_columns[0]])[0]) if suggested_target_columns else 0,
                     help="Содержимое этого столбца будет отправлено в LLM для анализа"
                 )
                 
@@ -396,7 +396,7 @@ def main():
                     target_column = st.selectbox(
                         "Целевой столбец для обработки", 
                         df.columns,
-                        index=df.columns.get_indexer([suggested_target_columns[0]])[0] if suggested_target_columns else 0,
+                        index=int(df.columns.get_indexer([suggested_target_columns[0]])[0]) if suggested_target_columns else 0,
                         help="Содержимое этого столбца будет отправлено в LLM для анализа"
                     )
                 
