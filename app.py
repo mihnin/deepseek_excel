@@ -253,6 +253,10 @@ def main():
     if "table_analysis_result" not in st.session_state:
         st.session_state["table_analysis_result"] = None
     
+    # Получаем параметр активной вкладки из URL (если есть)
+    query_params = st.experimental_get_query_params()
+    active_tab = query_params.get("active_tab", ["tab1"])[0]
+    
     # Боковая панель
     with st.sidebar:
         st.image("https://via.placeholder.com/100x100.png?text=DeepSeek", width=100)
@@ -277,8 +281,17 @@ def main():
     # Основная область
     st.title("DeepSeek Excel Processor Pro")
     
-    # Вкладки для этапов работы
+    # Вкладки для этапов работы - установка индекса активной вкладки
+    tab_index = {"tab1": 0, "tab2": 1, "tab3": 2}.get(active_tab, 0)
     tab1, tab2, tab3 = st.tabs(["1. Загрузка данных", "2. Настройка анализа", "3. Результаты"])
+
+    # Set the active tab based on the query parameter
+    if tab_index == 1:
+        st.experimental_set_query_params(active_tab="tab2")
+        st.experimental_rerun()
+    elif tab_index == 2:
+        st.experimental_set_query_params(active_tab="tab3")
+        st.experimental_rerun()
     
     # ======================== Вкладка 1: Загрузка данных ========================
     with tab1:
@@ -344,7 +357,9 @@ def main():
         
         # Кнопка для перехода к следующей вкладке
         if st.session_state["df"] is not None:
-            st.button("Перейти к настройке анализа ➡️", on_click=lambda: st.query_params.update({"active_tab": "tab2"}))
+            if st.button("Перейти к настройке анализа ➡️"):
+                st.experimental_set_query_params(active_tab="tab2")
+                st.experimental_rerun()
     
     # ======================== Вкладка 2: Настройка анализа ========================
     with tab2:
@@ -623,7 +638,8 @@ def main():
                         st.session_state["result_df"] = df
                         
                         # Переходим к вкладке с результатами
-                        st.query_params.update({"active_tab": "tab3"})
+                        st.experimental_set_query_params(active_tab="tab3")
+                        st.experimental_rerun()
                     
                     except Exception as e:
                         st.error(f"Произошла ошибка при выполнении построчного анализа: {e}")
@@ -681,7 +697,8 @@ def main():
                                 st.session_state["result_df"] = df  # Оригинальный DataFrame
                                 
                                 # Переходим к вкладке с результатами
-                                st.query_params.update({"active_tab": "tab3"})
+                                st.experimental_set_query_params(active_tab="tab3")
+                                st.experimental_rerun()
                     
                     except Exception as e:
                         st.error(f"Произошла ошибка при выполнении анализа всей таблицы: {e}")
@@ -930,7 +947,8 @@ def main():
                         st.session_state["result_df"] = df
                         
                         # Переходим к вкладке с результатами
-                        st.query_params.update({"active_tab": "tab3"})
+                        st.experimental_set_query_params(active_tab="tab3")
+                        st.experimental_rerun()
                     
                     except Exception as e:
                         st.error(f"Произошла ошибка при выполнении комбинированного анализа: {e}")
