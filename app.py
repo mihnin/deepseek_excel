@@ -6,10 +6,18 @@ import json
 import logging
 import os
 
+# Настройка страницы должна быть первой командой Streamlit
+st.set_page_config(
+    page_title="DeepSeek Excel Processor Pro", 
+    page_icon="📊", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Устанавливаем конфигурацию логгера
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levellevelname)s - %(message)s',
     handlers=[
         logging.FileHandler("app.log"),
         logging.StreamHandler()
@@ -37,14 +45,6 @@ def cached_analyze_dataframe(df):
     """Кэшированный анализ DataFrame"""
     excel_handler = ExcelHandler()
     return excel_handler.analyze_dataframe(df)
-
-# Установка страницы и базовой конфигурации
-st.set_page_config(
-    page_title="DeepSeek Excel Процессор Pro", 
-    page_icon="📊", 
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Инициализация менеджера профилей
 profile_manager = ProfileManager()
@@ -143,6 +143,12 @@ def main():
     # Инициализация менеджера конфигурации
     config_manager = ConfigManager()
     
+    # Использование конфигурации для параметров страницы
+    app_title = config_manager.get("app.title", "DeepSeek Excel Processor Pro")
+    app_icon = config_manager.get("app.icon", "📊")
+    sidebar_state = config_manager.get("app.sidebar_state", "expanded")
+    layout = config_manager.get("app.layout", "wide")
+    
     # Инициализация состояния сессии
     if "processing" not in st.session_state:
         st.session_state["processing"] = False
@@ -162,20 +168,6 @@ def main():
     # Получение параметра активной вкладки из URL (если есть)
     query_params = st.experimental_get_query_params()
     active_tab = query_params.get("active_tab", ["tab1"])[0]
-    
-    # Использование конфигурации
-    app_title = config_manager.get("app.title", "DeepSeek Excel Processor Pro")
-    app_icon = config_manager.get("app.icon", "📊")
-    sidebar_state = config_manager.get("app.sidebar_state", "expanded")
-    layout = config_manager.get("app.layout", "wide")
-    
-    # Установка страницы и базовой конфигурации
-    st.set_page_config(
-        page_title=app_title, 
-        page_icon=app_icon, 
-        layout=layout,
-        initial_sidebar_state=sidebar_state
-    )
     
     # Боковая панель
     with st.sidebar:
