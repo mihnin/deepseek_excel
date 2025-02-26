@@ -1,6 +1,6 @@
 # ui/export_view.py
 import streamlit as st
-from modules.export_utils import ExportManager
+from modules.excel_handler import ExcelHandler  # Изменено с export_utils.py
 from datetime import datetime
 
 def render_export_ui(df, table_analysis=None):
@@ -15,8 +15,8 @@ def render_export_ui(df, table_analysis=None):
     
     with col1:
         # Excel
-        excel_data = ExportManager.to_excel(df)
-        ExportManager.create_download_button(
+        excel_data = ExcelHandler.to_excel(df)  # Изменено с ExportManager
+        ExcelHandler.create_download_button(
             excel_data, 
             f"{base_filename}.xlsx", 
             "📥 Скачать как Excel",
@@ -24,8 +24,8 @@ def render_export_ui(df, table_analysis=None):
         )
         
         # JSON
-        json_data = ExportManager.to_json(df)
-        ExportManager.create_download_button(
+        json_data = ExcelHandler.to_json(df)
+        ExcelHandler.create_download_button(
             json_data, 
             f"{base_filename}.json", 
             "📥 Скачать как JSON",
@@ -34,8 +34,8 @@ def render_export_ui(df, table_analysis=None):
     
     with col2:
         # CSV
-        csv_data = ExportManager.to_csv(df)
-        ExportManager.create_download_button(
+        csv_data = ExcelHandler.to_csv(df)
+        ExcelHandler.create_download_button(
             csv_data, 
             f"{base_filename}.csv", 
             "📥 Скачать как CSV",
@@ -44,8 +44,8 @@ def render_export_ui(df, table_analysis=None):
         
         # Word (если есть анализ всей таблицы)
         if table_analysis:
-            word_data = ExportManager.to_word(df, table_analysis)
-            ExportManager.create_download_button(
+            word_data = ExcelHandler.to_word(df, table_analysis)
+            ExcelHandler.create_download_button(
                 word_data, 
                 f"{base_filename}.docx", 
                 "📥 Скачать отчет Word",

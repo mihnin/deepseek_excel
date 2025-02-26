@@ -22,6 +22,21 @@ from modules.file_utils import FileProcessor
 from modules.prompt_library import get_business_prompts, customize_prompt
 from ui.llm_settings_view import llm_settings_ui
 from utils.profile_manager import ProfileManager
+from utils.config_manager import ConfigManager
+
+# Кэширование загрузки Excel-файла
+@st.cache_data
+def cached_load_excel(file):
+    """Кэшированная загрузка Excel файла"""
+    excel_handler = ExcelHandler()
+    return excel_handler.load_excel(file)
+
+# Кэширование анализа DataFrame
+@st.cache_data
+def cached_analyze_dataframe(df):
+    """Кэшированный анализ DataFrame"""
+    excel_handler = ExcelHandler()
+    return excel_handler.analyze_dataframe(df)
 
 # Установка страницы и базовой конфигурации
 st.set_page_config(
@@ -73,9 +88,8 @@ def analyze_full_table(df, llm_provider, prompt, settings, context_files=None):
     Returns:
         tuple: (результат, ошибка)
     """
-    # Подготовка контекстной информации о таблице
-    excel_handler = ExcelHandler()
-    stats = excel_handler.analyze_dataframe(df)
+    # Подготовка контекстной информации о таблице используя кэшированный анализ
+    stats = cached_analyze_dataframe(df)
     
     # Подготовка дополнительных файлов контекста
     file_processor = FileProcessor()
@@ -126,6 +140,9 @@ def analyze_full_table(df, llm_provider, prompt, settings, context_files=None):
 
 # Основная функция приложения
 def main():
+    # Инициализация менеджера конфигурации
+    config_manager = ConfigManager()
+    
     # Инициализация состояния сессии
     if "processing" not in st.session_state:
         st.session_state["processing"] = False
@@ -137,18 +154,37 @@ def main():
         st.session_state["result_df"] = None
     if "table_analysis_result" not in st.session_state:
         st.session_state["table_analysis_result"] = None
+    if "config_manager" not in st.session_state:
+        st.session_state["config_manager"] = config_manager
+    else:
+        config_manager = st.session_state["config_manager"]
     
     # Получение параметра активной вкладки из URL (если есть)
     query_params = st.experimental_get_query_params()
     active_tab = query_params.get("active_tab", ["tab1"])[0]
     
+    # Использование конфигурации
+    app_title = config_manager.get("app.title", "DeepSeek Excel Processor Pro")
+    app_icon = config_manager.get("app.icon", "📊")
+    sidebar_state = config_manager.get("app.sidebar_state", "expanded")
+    layout = config_manager.get("app.layout", "wide")
+    
+    # Установка страницы и базовой конфигурации
+    st.set_page_config(
+        page_title=app_title, 
+        page_icon=app_icon, 
+        layout=layout,
+        initial_sidebar_state=sidebar_state
+    )
+    
     # Боковая панель
     with st.sidebar:
-        st.image("https://via.placeholder.com/100x100.png?text=DeepSeek", width=100)
-        st.title("DeepSeek Excel Pro")
+        logo_url = config_manager.get("app.logo_url", "https://via.placeholder.com/100x100.png?text=DeepSeek")
+        st.image(logo_url, width=100)
+        st.title(app_title)
         
         # Режим работы
-        mode_options = ["Построчный анализ", "Анализ всей таблицы", "Комбинированный анализ"]
+        mode_options = config_manager.get("app.modes", ["Построчный анализ", "Анализ всей таблицы", "Комбинированный анализ"])
         mode = st.radio("Режим анализа", mode_options, key="mode")
         
         # Управление профилями настроек
@@ -158,10 +194,11 @@ def main():
         llm_settings = llm_settings_ui()
         
         st.divider()
-        st.caption("© 2025 DeepSeek Excel Processor Pro")
+        copyright_text = config_manager.get("app.copyright", "© 2025 DeepSeek Excel Processor Pro")
+        st.caption(copyright_text)
     
     # Основная область
-    st.title("DeepSeek Excel Processor Pro")
+    st.title(app_title)
     
     # Вкладки для этапов работы - установка индекса активной вкладки
     tab_index = {"tab1": 0, "tab2": 1, "tab3": 2}.get(active_tab, 0)
@@ -187,13 +224,12 @@ def main():
         
         if excel_file is not None:
             try:
-                # Используем ExcelHandler для загрузки и анализа
-                excel_handler = ExcelHandler()
-                df = excel_handler.load_excel(excel_file)
+                # Используем кэшированную загрузку и анализ
+                df = cached_load_excel(excel_file)
                 st.session_state["df"] = df
                 
-                # Анализируем DataFrame
-                stats = excel_handler.analyze_dataframe(df)
+                # Кэшированный анализ DataFrame
+                stats = cached_analyze_dataframe(df)
                 
                 st.success(f"Файл успешно загружен. Размер: {stats['rows']} строк × {stats['columns']} столбцов")
                 

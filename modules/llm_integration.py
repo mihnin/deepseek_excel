@@ -1,8 +1,10 @@
 # llm_integration.py
 import time
 import json
+import logging
 from typing import Dict, List, Tuple, Optional, Any, Union
 from openai import OpenAI
+from modules.api_utils import APIUtils
 
 class LLMServiceProvider:
     """
@@ -21,6 +23,14 @@ class LLMServiceProvider:
         self.api_key = api_key
         self.base_url = base_url
         self.client = OpenAI(api_key=api_key, base_url=base_url)
+        # Инициализация логгера
+        self.logger = logging.getLogger(__name__)
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO)
     
     def get_model_list(self) -> List[Dict[str, Any]]:
         """
@@ -56,8 +66,8 @@ class LLMServiceProvider:
         top_p: float = 1.0,
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
-        max_retries: int = 3,
-        retry_delay: int = 2
+        max_retries: int = 5,
+        retry_delay: int = 1
     ) -> Tuple[Optional[str], Optional[str]]:
         """
         Выполняет запрос к API модели с механизмом повторных попыток.
@@ -71,16 +81,12 @@ class LLMServiceProvider:
             frequency_penalty (float): Штраф за повторение
             presence_penalty (float): Штраф за наличие
             max_retries (int): Максимальное количество повторных попыток
-            retry_delay (int): Задержка между попытками в секундах
+            retry_delay (int): Начальная задержка между попытками в секундах
             
         Returns:
             Tuple[Optional[str], Optional[str]]: (ответ, ошибка)
         """
-        attempt = 0
-        last_error = None
-        
-        while attempt < max_retries:
-            attempt += 1
+        def _make_request() -> Tuple[Optional[str], Optional[str]]:
             try:
                 response = self.client.chat.completions.create(
                     model=model,
@@ -102,16 +108,16 @@ class LLMServiceProvider:
                 return None, "Неожиданный формат ответа от API"
                 
             except Exception as e:
-                last_error = f"Ошибка в попытке {attempt}: {str(e)}"
-                
-                # Если это последняя попытка, возвращаем ошибку
-                if attempt >= max_retries:
-                    return None, last_error
-                
-                # Иначе делаем паузу перед следующей попыткой
-                time.sleep(retry_delay)
+                return None, f"Ошибка API: {str(e)}"
         
-        return None, f"Не удалось получить ответ после {max_retries} попыток"
+        # Использование APIUtils для повторных попыток
+        return APIUtils.retry_with_backoff(
+            _make_request,
+            max_retries=max_retries,
+            initial_delay=retry_delay,
+            max_delay=60.0,
+            backoff_factor=2.0
+        )
     
     def estimate_tokens(self, text: str) -> int:
         """
@@ -276,6 +282,7 @@ class LLMServiceProvider:
 
 # Пример использования:
 if __name__ == "__main__":
+
     # Пример для тестирования
     api_key = "your-api-key-here"
     llm_service = LLMServiceProvider(api_key)

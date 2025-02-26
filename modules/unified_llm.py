@@ -2,6 +2,10 @@
 import logging
 from typing import Dict, List, Tuple, Optional, Any, Union
 
+# Явные импорты классов провайдеров
+from modules.local_llm_integration import LocalLLMProvider
+from modules.llm_integration import LLMServiceProvider
+
 class UnifiedLLMProvider:
     """
     Универсальный провайдер LLM, объединяющий локальные и облачные модели
@@ -40,28 +44,26 @@ class UnifiedLLMProvider:
     def _init_provider(self):
         """Инициализирует провайдер на основе конфигурации"""
         if self.config["provider_type"] == "cloud":
-            # Импортируем класс для облачных LLM
+            # Используем глобально импортированный класс
             try:
-                from modules.llm_integration import LLMServiceProvider
                 self.provider = LLMServiceProvider(
                     api_key=self.config["cloud_api_key"],
                     base_url=self.config["cloud_base_url"]
                 )
                 self.logger.info(f"Инициализирован облачный провайдер: {self.config['cloud_base_url']}")
-            except ImportError:
-                self.logger.error("Не удалось импортировать LLMServiceProvider")
+            except Exception:
+                self.logger.error("Не удалось инициализировать LLMServiceProvider")
                 self.provider = None
         else:
             # Используем локальный провайдер
             try:
-                from modules.local_llm import LocalLLMProvider
                 self.provider = LocalLLMProvider(
                     provider=self.config["local_provider"],
                     base_url=self.config["local_base_url"]
                 )
                 self.logger.info(f"Инициализирован локальный провайдер: {self.config['local_provider']}")
-            except ImportError:
-                self.logger.error("Не удалось импортировать LocalLLMProvider")
+            except Exception:
+                self.logger.error("Не удалось инициализировать LocalLLMProvider")
                 self.provider = None
     
     def switch_provider(self, provider_type: str, **kwargs):

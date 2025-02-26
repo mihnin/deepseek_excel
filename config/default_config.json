@@ -1,1 +1,53 @@
-{}
+{
+  "app": {
+    "title": "DeepSeek Excel Processor Pro",
+    "icon": "📊",
+    "version": "1.0.0"
+  },
+  "llm": {
+    "default_provider": "cloud",
+    "cloud": {
+      "base_url": "https://api.deepseek.com",
+      "models": ["deepseek-chat", "deepseek-coder"],
+      "default_model": "deepseek-chat"
+    },
+    "local": {
+      "providers": ["ollama", "lmstudio", "textgen_webui"],
+      "default_provider": "ollama",
+      "base_urls": {
+        "ollama": "http://localhost:11434",
+        "lmstudio": "http://localhost:1234/v1",
+        "textgen_webui": "http://localhost:5000/v1",
+        "custom": "http://localhost:8000"
+      },
+      "default_model": "llama2"
+    },
+    "parameters": {
+      "temperature": 0.7,
+      "max_tokens": 300,
+      "top_p": 1.0,
+      "frequency_penalty": 0.0,
+      "presence_penalty": 0.0
+    }
+  },
+  "analysis": {
+    "modes": ["Построчный анализ", "Анализ всей таблицы", "Комбинированный анализ"],
+    "default_mode": "Построчный анализ",
+    "max_file_size_mb": 50,
+    "max_rows_limit": 1000
+  },
+  "export": {
+    "formats": ["excel", "csv", "json", "word"],
+    "excel": {
+      "engine": "openpyxl"
+    },
+    "csv": {
+      "encoding": "utf-8-sig"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "app.log"
+  }
+}

@@ -240,3 +240,63 @@ deepseek_excel/
 При возникновении вопросов или проблем:
 - Создайте Issue в репозитории проекта
 - Свяжитесь с командой разработки по email: support@deepseek-excel.example.com
+- 
+## Тестирование приложения
+
+### Запуск тестов
+
+Для запуска всех тестов используйте:
+
+```bash
+python run_tests.py
+
+Для запуска конкретного теста:
+
+python -m unittest tests/test_excel_handler.py
+
+Добавление новых тестов
+
+Создайте файл в директории tests/ с именем, начинающимся с test_
+Определите класс тестов, наследующийся от unittest.TestCase
+Определите методы с именами, начинающимися с test_
+
+Пример:
+import unittest
+from modules.your_module import YourClass
+
+class TestYourClass(unittest.TestCase):
+    def setUp(self):
+        self.instance = YourClass()
+    
+    def test_your_method(self):
+        result = self.instance.your_method(test_input)
+        self.assertEqual(result, expected_output)
+
+deepseek_excel/
+├── app.py                        # Главное приложение
+├── config/                       # Централизованная конфигурация
+│   └── default_config.json       # Настройки по умолчанию
+├── modules/                      # Модули проекта
+│   ├── api_utils.py              # Новый модуль для работы с API
+│   ├── data_processor.py         # Обработка данных
+│   ├── excel_handler.py          # Единый модуль для работы с Excel
+│   ├── file_utils.py             # Работа с файлами
+│   ├── llm_integration.py        # Работа с облачными LLM
+│   ├── local_llm_integration.py  # Работа с локальными LLM
+│   ├── prompt_library.py         # Библиотека промптов
+│   ├── unified_llm.py            # Унифицированный LLM клиент
+│   └── visualization.py          # Визуализация данных
+├── ui/                           # Компоненты пользовательского интерфейса
+│   ├── export_view.py            # Обновленный модуль экспорта
+│   ├── ...
+├── utils/                        # Утилиты
+│   ├── config_manager.py         # Новый менеджер конфигурации
+│   └── profile_manager.py        # Управление профилями
+├── tests/                        # Тесты
+│   ├── test_api_utils.py         # Новый тест
+│   ├── test_excel_handler.py
+│   └── ...
+├── docs/                         # Новая директория для документации
+│   └── api/                      # Документация API
+├── run_tests.py                  # Новый скрипт для запуска тестов
+└── requirements.txt              # Зависимости

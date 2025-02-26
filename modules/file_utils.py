@@ -2,6 +2,8 @@
 from io import BytesIO
 from typing import List, Dict, Any, Optional, Union
 import logging
+import pandas as pd
+import re
 
 class FileProcessor:
     """
@@ -184,3 +186,80 @@ class FileProcessor:
             })
         
         return summary
+    
+    @staticmethod
+    def read_excel(file) -> pd.DataFrame:
+        """
+        Читает Excel файл и возвращает DataFrame.
+        
+        Args:
+            file: Файл Excel (BytesIO или путь)
+            
+        Returns:
+            pd.DataFrame: Данные из Excel
+        """
+        try:
+            return pd.read_excel(file)
+        except Exception as e:
+            raise ValueError(f"Ошибка при чтении Excel файла: {e}")
+    
+    @staticmethod
+    def detect_text_language(text: str) -> str:
+        """
+        Определяет язык текста (упрощенная версия).
+        
+        Args:
+            text (str): Текст для анализа
+            
+        Returns:
+            str: Код языка (ru, en, etc.)
+        """
+        # Простая эвристика по наличию кириллических символов
+        if re.search('[а-яА-Я]', text):
+            return 'ru'
+        else:
+            return 'en'
+    
+    @staticmethod
+    def process_text_file(file, encoding: str = 'utf-8', max_length: int = 10000) -> str:
+        """
+        Обрабатывает текстовый файл для использования в качестве контекста.
+        
+        Args:
+            file: Текстовый файл (BytesIO или путь)
+            encoding (str): Кодировка файла
+            max_length (int): Максимальная длина текста
+            
+        Returns:
+            str: Обработанный текст
+        """
+        try:
+            if hasattr(file, 'read'):
+                content = file.read().decode(encoding)
+            else:
+                with open(file, 'r', encoding=encoding) as f:
+                    content = f.read()
+            
+            # Ограничиваем размер
+            if len(content) > max_length:
+                content = content[:max_length] + "... [содержимое сокращено]"
+            
+            return content
+        except UnicodeDecodeError:
+            # Пробуем другую кодировку, если utf-8 не сработала
+            try:
+                if hasattr(file, 'read'):
+                    file.seek(0)  # Перемещаем указатель в начало
+                    content = file.read().decode('cp1251')  # Пробуем кодировку Windows
+                else:
+                    with open(file, 'r', encoding='cp1251') as f:
+                        content = f.read()
+                
+                if len(content) > max_length:
+                    content = content[:max_length] + "... [содержимое сокращено]"
+                
+                return content
+            except Exception as e:
+                return f"[Ошибка чтения файла: {e}]"
+        except Exception as e:
+            return f"[Ошибка обработки файла: {e}]"
