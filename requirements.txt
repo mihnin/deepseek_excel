@@ -1,5 +1,5 @@
 # Основные библиотеки
-streamlit==1.25.0
+streamlit
 pandas==2.0.3
 numpy==1.24.3
 openpyxl==3.1.2
@@ -18,9 +18,9 @@ altair==5.0.1
 seaborn==0.12.2
 
 # Дополнительные компоненты Streamlit
-streamlit-extras==0.3.0  # Дополнительные компоненты для Streamlit
-streamlit-aggrid==0.3.4  # Продвинутые таблицы
-streamlit-option-menu==0.3.6  # Меню опций
+streamlit-extras  # Дополнительные компоненты для Streamlit
+streamlit-aggrid  # Продвинутые таблицы
+streamlit-option-menu  # Меню опций
 
 # Обработка файлов
 python-docx==0.8.11  # Работа с документами Word

@@ -62,10 +62,20 @@ def get_unified_llm_provider(settings):
     """
     try:
         from modules.unified_llm import UnifiedLLMProvider
+        # Проверяем наличие и валидность API ключа
+        if settings["provider_type"] == "cloud" and not settings.get("api_key"):
+            st.error("API ключ не указан для облачного провайдера")
+            return None
+            
+        # Проверяем URL
+        base_url = settings.get("cloud_base_url", "https://api.deepseek.com")
+        if not base_url.startswith("https://api.deepseek.com"):
+            st.warning(f"Базовый URL '{base_url}' может быть неправильным. Рекомендуемое значение: 'https://api.deepseek.com'")
+            
         return UnifiedLLMProvider({
             "provider_type": settings["provider_type"],
             "cloud_api_key": settings["api_key"],
-            "cloud_base_url": settings["cloud_base_url"],
+            "cloud_base_url": base_url,
             "local_provider": settings["local_provider"],
             "local_base_url": settings["local_base_url"]
         })
@@ -166,7 +176,7 @@ def main():
         config_manager = st.session_state["config_manager"]
     
     # Получение параметра активной вкладки из URL (если есть)
-    query_params = st.experimental_get_query_params()
+    query_params = st.query_params
     active_tab = query_params.get("active_tab", ["tab1"])[0]
     
     # Боковая панель
@@ -198,11 +208,11 @@ def main():
 
     # Set the active tab based on the query parameter
     if tab_index == 1:
-        st.experimental_set_query_params(active_tab="tab2")
-        st.experimental_rerun()
+        st.query_params["active_tab"] = "tab2"
+        st.rerun()
     elif tab_index == 2:
-        st.experimental_set_query_params(active_tab="tab3")
-        st.experimental_rerun()
+        st.query_params["active_tab"] = "tab3"
+        st.rerun()
     
     # ======================== Вкладка 1: Загрузка данных ========================
     with tab1:
@@ -273,8 +283,8 @@ def main():
         # Кнопка для перехода к следующей вкладке
         if st.session_state["df"] is not None:
             if st.button("Перейти к настройке анализа ➡️"):
-                st.experimental_set_query_params(active_tab="tab2")
-                st.experimental_rerun()
+                st.query_params["active_tab"] = "tab2"
+                st.rerun()
     
     # ======================== Вкладка 2: Настройка анализа ========================
     with tab2:
@@ -687,8 +697,8 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
         st.session_state["result_df"] = result_df
         
         # Переходим к вкладке с результатами
-        st.experimental_set_query_params(active_tab="tab3")
-        st.experimental_rerun()
+        st.query_params["active_tab"] = "tab3"
+        st.rerun()
     
     except Exception as e:
         st.error(f"Произошла ошибка при выполнении построчного анализа: {e}")
@@ -739,8 +749,8 @@ def process_full_table(df, llm_provider, llm_settings, focus_columns, context_fi
                 st.session_state["result_df"] = df  # Оригинальный DataFrame
                 
                 # Переходим к вкладке с результатами
-                st.experimental_set_query_params(active_tab="tab3")
-                st.experimental_rerun()
+                st.query_params["active_tab"] = "tab3"
+                st.rerun()
     
     except Exception as e:
         st.error(f"Произошла ошибка при выполнении анализа всей таблицы: {e}")
@@ -931,8 +941,8 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         st.session_state["result_df"] = result_df
         
         # Переходим к вкладке с результатами
-        st.experimental_set_query_params(active_tab="tab3")
-        st.experimental_rerun()
+        st.query_params["active_tab"] = "tab3"
+        st.rerun()
     
     except Exception as e:
         st.error(f"Произошла ошибка при выполнении комбинированного анализа: {e}")

@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, Optional, Any, Union
 from openai import OpenAI
 from modules.api_utils import APIUtils
 
+
 class LLMServiceProvider:
     """
     Класс для работы с различными LLM сервисами через единый интерфейс.
@@ -99,14 +100,9 @@ class LLMServiceProvider:
                     stream=False
                 )
                 
-                # Получение ответа из разных возможных форматов
-                if hasattr(response, 'choices') and len(response.choices) > 0:
-                    if hasattr(response.choices[0], 'message'):
-                        return response.choices[0].message.content.strip(), None
-                
-                # Если ответ не в ожидаемом формате
-                return None, "Неожиданный формат ответа от API"
-                
+                # Правильно извлекаем ответ
+                return response.choices[0].message.content.strip(), None
+                    
             except Exception as e:
                 return None, f"Ошибка API: {str(e)}"
         
