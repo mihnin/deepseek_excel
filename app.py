@@ -174,10 +174,9 @@ def main():
         st.session_state["config_manager"] = config_manager
     else:
         config_manager = st.session_state["config_manager"]
-    
-    # Получение параметра активной вкладки из URL (если есть)
-    query_params = st.query_params
-    active_tab = query_params.get("active_tab", ["tab1"])[0]
+    # Инициализация активной вкладки, если её нет
+    if "active_tab" not in st.session_state:
+        st.session_state["active_tab"] = "tab1"
     
     # Боковая панель
     with st.sidebar:
@@ -202,20 +201,19 @@ def main():
     # Основная область
     st.title(app_title)
     
-    # Вкладки для этапов работы - установка индекса активной вкладки
-    tab_index = {"tab1": 0, "tab2": 1, "tab3": 2}.get(active_tab, 0)
-    tab1, tab2, tab3 = st.tabs(["1. Загрузка данных", "2. Настройка анализа", "3. Результаты"])
-
-    # Set the active tab based on the query parameter
-    if tab_index == 1:
-        st.query_params["active_tab"] = "tab2"
-        st.rerun()
-    elif tab_index == 2:
-        st.query_params["active_tab"] = "tab3"
-        st.rerun()
+    # Определение индекса активной вкладки на основе session_state
+    tab_index = 0
+    if "active_tab" in st.session_state:
+        if st.session_state["active_tab"] == "tab2":
+            tab_index = 1
+        elif st.session_state["active_tab"] == "tab3":
+            tab_index = 2
     
+    # Создание вкладок
+    tabs = st.tabs(["1. Загрузка данных", "2. Настройка анализа", "3. Результаты"])
+
     # ======================== Вкладка 1: Загрузка данных ========================
-    with tab1:
+    with tabs[0]:
         st.header("Загрузка данных")
         
         excel_file = st.file_uploader(
@@ -280,14 +278,15 @@ def main():
             for file_info in file_summary["files"]:
                 st.info(f"Файл: {file_info['name']} ({file_info['size']} байт) - Тип: {file_info['type']}")
         
-        # Кнопка для перехода к следующей вкладке
+        # Кнопка для перехода к следующей вкладке (изменен механизм)
         if st.session_state["df"] is not None:
             if st.button("Перейти к настройке анализа ➡️"):
-                st.query_params["active_tab"] = "tab2"
+                # Вместо использования query_params используем прямое управление состоянием
+                st.session_state["active_tab"] = "tab2"
                 st.rerun()
     
     # ======================== Вкладка 2: Настройка анализа ========================
-    with tab2:
+    with tabs[1]:
         if st.session_state["df"] is None:
             st.info("Сначала загрузите Excel файл на предыдущей вкладке")
         else:
@@ -490,7 +489,7 @@ def main():
                             process_combined_analysis(df, llm_provider, llm_settings, target_column, additional_columns, focus_columns_table, execution_order, context_files)
     
     # ======================== Вкладка 3: Результаты ========================
-    with tab3:
+    with tabs[2]:
         if st.session_state["result_df"] is None and st.session_state["table_analysis_result"] is None:
             st.info("После обработки данных здесь появятся результаты")
         else:
@@ -697,7 +696,7 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
         st.session_state["result_df"] = result_df
         
         # Переходим к вкладке с результатами
-        st.query_params["active_tab"] = "tab3"
+        st.session_state["active_tab"] = "tab3"
         st.rerun()
     
     except Exception as e:
@@ -749,7 +748,7 @@ def process_full_table(df, llm_provider, llm_settings, focus_columns, context_fi
                 st.session_state["result_df"] = df  # Оригинальный DataFrame
                 
                 # Переходим к вкладке с результатами
-                st.query_params["active_tab"] = "tab3"
+                st.session_state["active_tab"] = "tab3"
                 st.rerun()
     
     except Exception as e:
@@ -941,7 +940,7 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         st.session_state["result_df"] = result_df
         
         # Переходим к вкладке с результатами
-        st.query_params["active_tab"] = "tab3"
+        st.session_state["active_tab"] = "tab3"
         st.rerun()
     
     except Exception as e:
