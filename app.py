@@ -211,19 +211,33 @@ def main():
     # Основная область
     st.title(app_title)
     
-    # Определение индекса активной вкладки на основе session_state
+    # Замена механизма вкладок на radio-кнопки
+    tab_names = ["1. Загрузка данных", "2. Настройка анализа", "3. Результаты"]
+
+    # Определение индекса из session_state
     tab_index = 0
     if "active_tab" in st.session_state:
         if st.session_state["active_tab"] == "tab2":
             tab_index = 1
         elif st.session_state["active_tab"] == "tab3":
             tab_index = 2
-    
-    # Создание вкладок
-    tabs = st.tabs(["1. Загрузка данных", "2. Настройка анализа", "3. Результаты"])
+
+    # Создаем верхнюю навигацию с radio-кнопками
+    selected_tab = st.radio("Навигация", tab_names, index=tab_index, horizontal=True, label_visibility="collapsed")
+
+    # Обновляем session_state при изменении radio
+    if selected_tab == "1. Загрузка данных" and st.session_state.get("active_tab") != "tab1":
+        st.session_state["active_tab"] = "tab1"
+        st.rerun()
+    elif selected_tab == "2. Настройка анализа" and st.session_state.get("active_tab") != "tab2":
+        st.session_state["active_tab"] = "tab2" 
+        st.rerun()
+    elif selected_tab == "3. Результаты" and st.session_state.get("active_tab") != "tab3":
+        st.session_state["active_tab"] = "tab3"
+        st.rerun()
 
     # ======================== Вкладка 1: Загрузка данных ========================
-    with tabs[0]:
+    if st.session_state.get("active_tab") == "tab1" or selected_tab == "1. Загрузка данных":
         st.header("Загрузка данных")
         
         excel_file = st.file_uploader(
@@ -297,7 +311,7 @@ def main():
                 st.rerun()
 
     # ======================== Вкладка 2: Настройка анализа ========================
-    with tabs[1]:
+    elif st.session_state.get("active_tab") == "tab2" or selected_tab == "2. Настройка анализа":
         if st.session_state["df"] is None:
             st.info("Сначала загрузите Excel файл на предыдущей вкладке")
         else:
@@ -500,7 +514,7 @@ def main():
                             process_combined_analysis(df, llm_provider, llm_settings, target_column, additional_columns, focus_columns_table, execution_order, context_files)
     
     # ======================== Вкладка 3: Результаты ========================
-    with tabs[2]:
+    else:
         if st.session_state["result_df"] is None and st.session_state["table_analysis_result"] is None:
             st.info("После обработки данных здесь появятся результаты")
         else:

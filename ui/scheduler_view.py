@@ -28,7 +28,7 @@ def render_scheduler_ui():
                 if st.button(f"Удалить задачу #{task['id']}", key=f"delete_{task['id']}"):
                     scheduler.remove_task(task['id'])
                     st.success(f"Задача {task['name']} удалена!")
-                    st.experimental_rerun()
+                    st.rerun()
     
     # Форма для добавления новой задачи
     st.subheader("Добавить новую задачу")
@@ -87,7 +87,7 @@ def render_scheduler_ui():
                     # Запускаем планировщик, если он еще не запущен
                     if not scheduler.running:
                         scheduler.start()
-                    st.experimental_rerun()
+                    st.rerun()
             else:
                 st.error("Необходимо указать название задачи и путь к Excel-файлу")
     
