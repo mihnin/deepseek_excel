@@ -180,8 +180,18 @@ def main():
     
     # Боковая панель
     with st.sidebar:
-        logo_url = config_manager.get("app.logo_url", "https://via.placeholder.com/100x100.png?text=DeepSeek")
-        st.image(logo_url, width=100)
+        try:
+            # Проверяем локальный файл сначала
+            if os.path.exists("static/logo.png"):
+                st.image("static/logo.png", width=100)
+            else:
+                # Используем URL как запасной вариант
+                logo_url = config_manager.get("app.logo_url", "https://via.placeholder.com/100x100.png?text=DeepSeek")
+                st.image(logo_url, width=100)
+        except Exception as e:
+            st.error(f"Не удалось загрузить логотип: {e}")
+            # Продолжаем выполнение даже при ошибке логотипа
+            
         st.title(app_title)
         
         # Режим работы
@@ -281,10 +291,11 @@ def main():
         # Кнопка для перехода к следующей вкладке (изменен механизм)
         if st.session_state["df"] is not None:
             if st.button("Перейти к настройке анализа ➡️"):
-                # Вместо использования query_params используем прямое управление состоянием
+                # Добавляем прямую запись в session_state
                 st.session_state["active_tab"] = "tab2"
+                # Используем актуальный метод rerun
                 st.rerun()
-    
+
     # ======================== Вкладка 2: Настройка анализа ========================
     with tabs[1]:
         if st.session_state["df"] is None:
