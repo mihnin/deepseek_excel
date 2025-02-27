@@ -748,6 +748,7 @@ def process_full_table(df, llm_provider, llm_settings, focus_columns, context_fi
             # Подготовка параметров для анализа всей таблицы
             table_model_params = llm_settings.copy()
             table_model_params["max_tokens"] = max(1500, llm_settings["max_tokens"])  # Увеличиваем для анализа таблицы
+            table_model_params["model"] = llm_settings["model"]  # Добавляем ключ "model" в параметры
             
             # Подготовка промпта для всей таблицы
             focus_text = ""
@@ -813,6 +814,7 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         # Параметры для анализа всей таблицы (увеличенное max_tokens)
         table_model_params = model_params.copy()
         table_model_params["max_tokens"] = max(1500, model_params["max_tokens"])
+        table_model_params["model"] = llm_settings["model"]  # Добавляем ключ "model" в параметры
         
         # Подготовка контекстных файлов, если есть
         file_processor = FileProcessor()
