@@ -142,68 +142,64 @@ class ProfileManager:
         Отображает UI для управления профилями.
         """
         with st.expander("Управление профилями"):
-            col1, col2 = st.columns(2)
+            # Секция сохранения профиля
+            st.subheader("Сохранить текущие настройки")
+            profile_name = st.text_input("Название профиля", key="new_profile_name")
             
-            with col1:
-                st.subheader("Сохранить текущие настройки")
-                profile_name = st.text_input("Название профиля", key="new_profile_name")
-                
-                save_clicked = st.button("Сохранить профиль")
-                if save_clicked:
-                    if profile_name:
-                        # Собираем текущие настройки
-                        current_settings = {
-                            "provider_type": st.session_state.get("provider_type", "cloud"),
-                            "model": st.session_state.get("model", "deepseek-chat"),
-                            "local_model": st.session_state.get("local_model", "llama2"),
-                            "temperature": st.session_state.get("temperature", 0.7),
-                            "max_tokens": st.session_state.get("max_tokens", 300),
-                            "top_p": st.session_state.get("top_p", 1.0),
-                            "frequency_penalty": st.session_state.get("frequency_penalty", 0.0),
-                            "presence_penalty": st.session_state.get("presence_penalty", 0.0),
-                            "mode": st.session_state.get("mode", "Построчный анализ"),
-                            "custom_prompt": st.session_state.get("custom_prompt", ""),
-                            "cloud_base_url": st.session_state.get("cloud_base_url", "https://api.deepseek.com"),
-                            "local_provider": st.session_state.get("local_provider", "ollama"),
-                            "local_base_url": st.session_state.get("local_base_url", "http://localhost:11434")
-                        }
-                        
-                        if self.save_profile(profile_name, current_settings):
-                            st.success(f"Профиль '{profile_name}' успешно сохранен!")
-                        else:
-                            st.error("Не удалось сохранить профиль")
+            save_clicked = st.button("Сохранить профиль")
+            if save_clicked:
+                if profile_name:
+                    # Собираем текущие настройки
+                    current_settings = {
+                        "provider_type": st.session_state.get("provider_type", "cloud"),
+                        "model": st.session_state.get("model", "deepseek-chat"),
+                        "local_model": st.session_state.get("local_model", "llama2"),
+                        "temperature": st.session_state.get("temperature", 0.7),
+                        "max_tokens": st.session_state.get("max_tokens", 300),
+                        "top_p": st.session_state.get("top_p", 1.0),
+                        "frequency_penalty": st.session_state.get("frequency_penalty", 0.0),
+                        "presence_penalty": st.session_state.get("presence_penalty", 0.0),
+                        "mode": st.session_state.get("mode", "Построчный анализ"),
+                        "custom_prompt": st.session_state.get("custom_prompt", ""),
+                        "cloud_base_url": st.session_state.get("cloud_base_url", "https://api.deepseek.com"),
+                        "local_provider": st.session_state.get("local_provider", "ollama"),
+                        "local_base_url": st.session_state.get("local_base_url", "http://localhost:11434")
+                    }
+                    
+                    if self.save_profile(profile_name, current_settings):
+                        st.success(f"Профиль '{profile_name}' успешно сохранен!")
                     else:
-                        st.warning("Введите название профиля")
-            
-            with col2:
-                st.subheader("Загрузить сохраненный профиль")
-                profile_options = self.get_profile_list()
-                
-                if profile_options:
-                    selected_profile = st.selectbox(
-                        "Выберите профиль", 
-                        profile_options, 
-                        key="load_profile_select"
-                    )
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        if st.button("Загрузить профиль"):
-                            settings = self.load_profile(selected_profile)
-                            if settings:
-                                # Загрузка настроек в session_state
-                                for key, value in settings.items():
-                                    if not key.startswith("_"):  # Пропускаем служебные поля
-                                        st.session_state[key] = value
-                                st.success(f"Профиль '{selected_profile}' загружен!")
-                            else:
-                                st.error("Не удалось загрузить профиль")
-                    
-                    with col2:
-                        if st.button("Удалить профиль", type="secondary"):
-                            if self.delete_profile(selected_profile):
-                                st.success(f"Профиль '{selected_profile}' удален!")
-                            else:
-                                st.error("Не удалось удалить профиль")
+                        st.error("Не удалось сохранить профиль")
                 else:
-                    st.info("Нет сохраненных профилей")
+                    st.warning("Введите название профиля")
+            
+            # Секция загрузки профиля
+            st.subheader("Загрузить сохраненный профиль")
+            profile_options = self.get_profile_list()
+            
+            if profile_options:
+                selected_profile = st.selectbox(
+                    "Выберите профиль", 
+                    profile_options, 
+                    key="load_profile_select"
+                )
+                
+                # Кнопки загрузки и удаления без колонок
+                if st.button("Загрузить профиль"):
+                    settings = self.load_profile(selected_profile)
+                    if settings:
+                        # Загрузка настроек в session_state
+                        for key, value in settings.items():
+                            if not key.startswith("_"):  # Пропускаем служебные поля
+                                st.session_state[key] = value
+                        st.success(f"Профиль '{selected_profile}' загружен!")
+                    else:
+                        st.error("Не удалось загрузить профиль")
+                
+                if st.button("Удалить профиль", type="secondary"):
+                    if self.delete_profile(selected_profile):
+                        st.success(f"Профиль '{selected_profile}' удален!")
+                    else:
+                        st.error("Не удалось удалить профиль")
+            else:
+                st.info("Нет сохраненных профилей")
