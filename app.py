@@ -8,7 +8,7 @@ import os
 
 # Настройка страницы должна быть первой командой Streamlit
 st.set_page_config(
-    page_title="DeepSeek Excel Processor Pro", 
+    page_title="Умные комментарии для Excel на базе AI(LLM)", 
     page_icon="📊", 
     layout="wide",
     initial_sidebar_state="expanded"
