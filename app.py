@@ -154,7 +154,7 @@ def main():
     config_manager = ConfigManager()
     
     # Использование конфигурации для параметров страницы
-    app_title = config_manager.get("app.title", "DeepSeek Excel Processor Pro")
+    app_title = config_manager.get("app.title", "Умные комментарии для Excel на базе AI(LLM)")
     app_icon = config_manager.get("app.icon", "📊")
     sidebar_state = config_manager.get("app.sidebar_state", "expanded")
     layout = config_manager.get("app.layout", "wide")
@@ -208,7 +208,7 @@ def main():
         llm_settings = llm_settings_ui()
         
         st.divider()
-        copyright_text = config_manager.get("app.copyright", "© 2025 DeepSeek Excel Processor Pro")
+        copyright_text = config_manager.get("app.copyright", "© 2025 Умные комментарии для Excel на базе AI(LLM)")
         st.caption(copyright_text)
     
     # Основная область
