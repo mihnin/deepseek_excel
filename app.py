@@ -177,6 +177,9 @@ def main():
     # Инициализация активной вкладки, если её нет
     if "active_tab" not in st.session_state:
         st.session_state["active_tab"] = "tab1"
+    # Добавляем хранение контекстных файлов в session_state
+    if "context_files" not in st.session_state:
+        st.session_state["context_files"] = None
     
     # Боковая панель
     with st.sidebar:
@@ -292,6 +295,9 @@ def main():
             type=["txt", "csv", "md", "json"], 
             accept_multiple_files=True
         )
+        
+        # Сохраняем контекстные файлы в session_state
+        st.session_state["context_files"] = context_files
         
         if context_files:
             # Используем FileProcessor для обработки файлов
@@ -500,6 +506,9 @@ def main():
                     else:
                         st.session_state["processing"] = True
                         st.session_state["logs"] = []
+                        
+                        # Получаем контекстные файлы из session_state
+                        context_files = st.session_state.get("context_files")
                         
                         if st.session_state["mode"] == "Построчный анализ":
                             # Реализация построчного анализа
