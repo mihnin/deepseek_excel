@@ -115,7 +115,7 @@ class TaskScheduler:
             df = pd.read_excel(task["excel_path"])
             
             # Импортируем нужные модули внутри функции для избежания циклических импортов
-            from modules.unified_llm import UnifiedLLMProvider
+            from modules.unified_llm import UnifiedLLM as UnifiedLLMProvider
             
             # Инициализация LLM провайдера
             llm_provider = UnifiedLLMProvider(task["config"]["llm_settings"])

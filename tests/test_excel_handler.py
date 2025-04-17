@@ -183,7 +183,7 @@ class TestPromptLibrary(unittest.TestCase):
 
 import unittest
 from unittest.mock import MagicMock, patch
-from modules.unified_llm import UnifiedLLMProvider
+from modules.unified_llm import UnifiedLLM as UnifiedLLMProvider
 
 class TestUnifiedLLM(unittest.TestCase):
     @patch('modules.unified_llm.LocalLLMProvider')

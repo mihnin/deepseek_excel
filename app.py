@@ -59,15 +59,15 @@ profile_manager = ProfileManager()
 def get_unified_llm_provider(settings):
     """
     Возвращает унифицированный LLM провайдер.
-    
-    Args:
+      Args:
         settings: Настройки LLM
         
     Returns:
         Унифицированный LLM провайдер
     """
+    
     try:
-        from modules.unified_llm import UnifiedLLMProvider
+        from modules.unified_llm import UnifiedLLM as UnifiedLLMProvider
         # Проверяем наличие и валидность API ключа
         if settings["provider_type"] == "cloud" and not settings.get("api_key"):
             st.error("API ключ не указан для облачного провайдера")

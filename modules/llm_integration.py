@@ -1,10 +1,43 @@
 # llm_integration.py
-import time
-import json
 import logging
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Tuple, Optional, Any
 from openai import OpenAI
 from modules.api_utils import APIUtils
+from abc import ABC, abstractmethod
+
+
+class LLMIntegrationInterface(ABC):
+    """
+    Интерфейс для интеграции с различными LLM сервисами.
+    Все классы интеграции должны реализовывать этот интерфейс.
+    """
+    
+    @abstractmethod
+    def get_available_models(self) -> List[str]:
+        """
+        Получает список доступных моделей.
+        
+        Returns:
+            List[str]: Список названий доступных моделей
+        """
+        pass
+    
+    @abstractmethod
+    def generate_response(self, prompt: str, model: Optional[str] = None, 
+                          temperature: float = 0.7, max_tokens: int = 150) -> str:
+        """
+        Генерирует ответ от модели.
+        
+        Args:
+            prompt (str): Текст запроса
+            model (Optional[str]): Название модели (если None, используется модель по умолчанию)
+            temperature (float): Температура генерации (параметр случайности)
+            max_tokens (int): Максимальное количество токенов в ответе
+            
+        Returns:
+            str: Текст ответа от модели
+        """
+        pass
 
 
 class LLMServiceProvider:
