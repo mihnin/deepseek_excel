@@ -100,7 +100,7 @@ def llm_settings_ui() -> Dict[str, Any]:
             if st.button("Проверить соединение с локальной моделью"):
                 try:
                     # Импортируем класс для работы с локальными моделями
-                    from modules.local_llm import LocalLLMProvider
+                    from modules.local_llm_integration import LocalLLMProvider
                     
                     local_llm = LocalLLMProvider(
                         provider=st.session_state["local_provider"],
