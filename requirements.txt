@@ -40,3 +40,4 @@ loguru
 # Сохранение настроек
 toml
 pyyaml
+python-docx==0.8.11

@@ -57,14 +57,14 @@ class UnifiedLLM:
         else:
             # Используем локальный провайдер
             try:
-                self.provider = LocalLLMProvider({
-                    "provider_type": "local",
-                    "local_provider": self.config["local_provider"],
-                    "local_base_url": self.config["local_base_url"]
-                })
+                self.provider = LocalLLMProvider(
+                    provider=self.config["local_provider"],
+                    base_url=self.config["local_base_url"],
+                    timeout=60
+                )
                 self.logger.info(f"Инициализирован локальный провайдер: {self.config['local_provider']}")
-            except Exception:
-                self.logger.error("Не удалось инициализировать LocalLLMProvider")
+            except Exception as e:
+                self.logger.error(f"Не удалось инициализировать LocalLLMProvider: {e}")
                 self.provider = None
     
     def switch_provider(self, provider_type: str, **kwargs):

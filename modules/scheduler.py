@@ -99,6 +99,7 @@ class TaskScheduler:
         elif task["schedule_type"] == "monthly":
             # Реализация ежемесячного расписания требует дополнительной логики
             # ...
+            pass
         
         self.logger.info(f"Задача {task['name']} запланирована на {task['schedule_type']} {task['schedule_value']}")
     
@@ -115,10 +116,12 @@ class TaskScheduler:
             df = pd.read_excel(task["excel_path"])
             
             # Импортируем нужные модули внутри функции для избежания циклических импортов
-            from modules.unified_llm import UnifiedLLM as UnifiedLLMProvider
+            from modules.unified_llm_fixed import UnifiedLLM as UnifiedLLMProvider
             
             # Инициализация LLM провайдера
             llm_provider = UnifiedLLMProvider(task["config"]["llm_settings"])
+            
+            result_df = None # Инициализация result_df
             
             # Выполнение анализа в зависимости от режима
             if task["config"]["mode"] == "Построчный анализ":
@@ -137,7 +140,10 @@ class TaskScheduler:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_path = f"scheduled_results/{task['name']}_{timestamp}.xlsx"
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            result_df.to_excel(output_path, index=False)
+            if result_df is not None:
+                result_df.to_excel(output_path, index=False)
+            else:
+                self.logger.warning(f"Нет данных для сохранения для задачи {task['name']}. Возможно, режим анализа не реализован.")
             
             # Обновление информации о задаче
             task["last_run"] = datetime.now().isoformat()

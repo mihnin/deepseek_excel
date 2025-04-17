@@ -5,7 +5,22 @@ from io import BytesIO
 import io  # Добавляем импорт io для работы с потоками ввода-вывода
 from typing import Dict, List, Tuple, Optional, Any, Union
 import streamlit as st
-from docx import Document
+
+# Пробуем различные способы импорта Document для работы с Word
+try:
+    # Пытаемся импортировать из python-docx
+    from docx import Document
+    print("Успешно импортирован docx.Document из python-docx")
+except ImportError:
+    try:
+        # Если не получилось, пробуем импортировать из docx
+        import docx
+        Document = docx.Document
+        print("Успешно импортирован docx.Document из docx")
+    except ImportError:
+        # Если и это не получилось, определяем заглушку
+        print("Не удалось импортировать модуль docx")
+        Document = None
 
 class ExcelHandler:
     """
@@ -262,6 +277,14 @@ class ExcelHandler:
     @staticmethod
     def to_word(df, table_analysis=None, filename="export.docx"):
         """Экспорт в документ Word"""
+        # Проверяем, доступен ли Document
+        if Document is None:
+            # Если Document недоступен, возвращаем сообщение об ошибке
+            error_msg = "Не удалось создать документ Word: модуль docx не установлен. Установите python-docx: pip install python-docx"
+            print(error_msg)
+            # Возвращаем текстовый байт-объект с сообщением об ошибке
+            return error_msg.encode("utf-8")
+        
         doc = Document()
         
         # Добавляем заголовок

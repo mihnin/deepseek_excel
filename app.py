@@ -67,7 +67,7 @@ def get_unified_llm_provider(settings):
     """
     
     try:
-        from modules.unified_llm import UnifiedLLM as UnifiedLLMProvider
+        from modules.unified_llm_fixed import UnifiedLLM as UnifiedLLMProvider
         # Проверяем наличие и валидность API ключа
         if settings["provider_type"] == "cloud" and not settings.get("api_key"):
             st.error("API ключ не указан для облачного провайдера")
@@ -80,10 +80,10 @@ def get_unified_llm_provider(settings):
             
         return UnifiedLLMProvider({
             "provider_type": settings["provider_type"],
-            "cloud_api_key": settings["api_key"],
+            "cloud_api_key": settings.get("api_key", ""),  # Безопасно получаем api_key, используя пустую строку как значение по умолчанию
             "cloud_base_url": base_url,
-            "local_provider": settings["local_provider"],
-            "local_base_url": settings["local_base_url"]
+            "local_provider": settings.get("local_provider", "ollama"),  # Добавляем значение по умолчанию
+            "local_base_url": settings.get("local_base_url", "http://localhost:11434")  # Добавляем значение по умолчанию
         })
     except ImportError as e:
         st.error(f"Ошибка импорта модулей: {e}")
@@ -139,13 +139,13 @@ def analyze_full_table(df, llm_provider, prompt, settings, context_files=None):
     ]
     
     # Запрос к провайдеру LLM
-    model = settings["model"]
+    model = settings.get("model", settings.get("local_model", "llama2"))  # Безопасно получаем модель
     params = {
-        "temperature": settings["temperature"],
-        "max_tokens": settings["max_tokens"],
-        "top_p": settings["top_p"],
-        "frequency_penalty": settings["frequency_penalty"],
-        "presence_penalty": settings["presence_penalty"]
+        "temperature": settings.get("temperature", 0.7),
+        "max_tokens": settings.get("max_tokens", 300),
+        "top_p": settings.get("top_p", 1.0),
+        "frequency_penalty": settings.get("frequency_penalty", 0.0),
+        "presence_penalty": settings.get("presence_penalty", 0.0)
     }
     
     return llm_provider.chat_completion(
@@ -518,14 +518,14 @@ def main():
                         
                         if st.session_state["mode"] == "Построчный анализ":
                             # Реализация построчного анализа
-                            process_row_by_row(df, llm_provider, llm_settings, target_column, additional_columns, context_files)
+                            result_df = process_row_by_row(df, llm_provider, llm_settings, target_column, additional_columns, context_files)
                             
                         elif st.session_state["mode"] == "Анализ всей таблицы":
                             # Реализация анализа всей таблицы
-                            process_full_table(df, llm_provider, llm_settings, focus_columns, context_files)
+                            result_df = process_full_table(df, llm_provider, llm_settings, focus_columns, context_files)
                             
                         else:  # Комбинированный анализ
-                            process_combined_analysis(df, llm_provider, llm_settings, target_column, additional_columns, focus_columns_table, execution_order, context_files)
+                            result_df = process_combined_analysis(df, llm_provider, llm_settings, target_column, additional_columns, focus_columns_table, execution_order, context_files)
     
     # ======================== Вкладка 3: Результаты ========================
     else:
@@ -634,13 +634,13 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
         result_df[result_col] = ""
         
         # Получаем параметры модели из настроек
-        model = llm_settings["model"]
+        model = llm_settings.get("model", llm_settings.get("local_model", "llama2"))  # Безопасно получаем модель
         model_params = {
-            "temperature": llm_settings["temperature"],
-            "max_tokens": llm_settings["max_tokens"],
-            "top_p": llm_settings["top_p"],
-            "frequency_penalty": llm_settings["frequency_penalty"],
-            "presence_penalty": llm_settings["presence_penalty"]
+            "temperature": llm_settings.get("temperature", 0.7),
+            "max_tokens": llm_settings.get("max_tokens", 300),
+            "top_p": llm_settings.get("top_p", 1.0),
+            "frequency_penalty": llm_settings.get("frequency_penalty", 0.0),
+            "presence_penalty": llm_settings.get("presence_penalty", 0.0)
         }
         
         # Подготовка контекста из дополнительных файлов
@@ -737,6 +737,8 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
         # Переходим к вкладке с результатами
         st.session_state["active_tab"] = "tab3"
         st.rerun()
+        
+        return result_df # Возвращаем DataFrame с результатами
     
     except Exception as e:
         st.error(f"Произошла ошибка при выполнении построчного анализа: {e}")
@@ -809,17 +811,17 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         
         # Получаем параметры модели из настроек
         model_params = {
-            "temperature": llm_settings["temperature"],
-            "max_tokens": llm_settings["max_tokens"],
-            "top_p": llm_settings["top_p"],
-            "frequency_penalty": llm_settings["frequency_penalty"],
-            "presence_penalty": llm_settings["presence_penalty"]
+            "temperature": llm_settings.get("temperature", 0.7),
+            "max_tokens": llm_settings.get("max_tokens", 300),
+            "top_p": llm_settings.get("top_p", 1.0),
+            "frequency_penalty": llm_settings.get("frequency_penalty", 0.0),
+            "presence_penalty": llm_settings.get("presence_penalty", 0.0)
         }
         
         # Параметры для анализа всей таблицы (увеличенное max_tokens)
         table_model_params = model_params.copy()
         table_model_params["max_tokens"] = max(1500, model_params["max_tokens"])
-        table_model_params["model"] = llm_settings["model"]  # Добавляем ключ "model" в параметры
+        table_model_params["model"] = llm_settings.get("model", llm_settings.get("local_model", "llama2"))  # Безопасно получаем модель
         
         # Подготовка контекстных файлов, если есть
         file_processor = FileProcessor()
@@ -888,8 +890,8 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
                 # Запрос к LLM-провайдеру
                 response, error = llm_provider.chat_completion(
                     messages=messages,
-                    model=llm_settings["model"],
-                    **model_params
+                    model=table_model_params["model"],
+                    **table_model_params
                 )
                 
                 # Записываем результат в DataFrame
@@ -930,8 +932,8 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
                 # Запрос к LLM-провайдеру
                 response, error = llm_provider.chat_completion(
                     messages=messages,
-                    model=llm_settings["model"],
-                    **model_params
+                    model=table_model_params["model"],
+                    **table_model_params
                 )
                 
                 # Записываем результат в DataFrame
