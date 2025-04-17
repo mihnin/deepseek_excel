@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import logging
 import os
+import sys
 
 # Настройка страницы должна быть первой командой Streamlit
 st.set_page_config(
@@ -15,14 +16,19 @@ st.set_page_config(
 )
 
 # Устанавливаем конфигурацию логгера
+# Убедимся, что кодировка UTF-8 указана для FileHandler
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("app.log"),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("app.log", encoding='utf-8'), # Явно указываем UTF-8
+        logging.StreamHandler(stream=sys.stdout) # Оставляем вывод в консоль
+    ],
+    force=True # Перезаписываем любые предыдущие конфигурации
 )
+
+logger = logging.getLogger(__name__)
+logger.info("Логирование настроено с кодировкой UTF-8 для файла.")
 
 # Импорт модулей приложения
 from modules.excel_handler import ExcelHandler
@@ -519,7 +525,6 @@ def main():
                             process_full_table(df, llm_provider, llm_settings, focus_columns, context_files)
                             
                         else:  # Комбинированный анализ
-                            # Реализация комбинированного анализа
                             process_combined_analysis(df, llm_provider, llm_settings, target_column, additional_columns, focus_columns_table, execution_order, context_files)
     
     # ======================== Вкладка 3: Результаты ========================

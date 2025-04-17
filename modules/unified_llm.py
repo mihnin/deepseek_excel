@@ -2,11 +2,10 @@
 import logging
 from typing import Dict, List, Tuple, Optional, Any, Union
 
-# Явные импорты классов провайдеров
-from modules.local_llm_integration import LocalLLMProvider
-from modules.llm_integration import LLMServiceProvider
+from .local_llm_integration import LocalLLMIntegration
+from .xinference_integration import XInferenceIntegration
 
-class UnifiedLLMProvider:
+class UnifiedLLM:
     """
     Универсальный провайдер LLM, объединяющий локальные и облачные модели
     в едином интерфейсе.
@@ -57,10 +56,11 @@ class UnifiedLLMProvider:
         else:
             # Используем локальный провайдер
             try:
-                self.provider = LocalLLMProvider(
-                    provider=self.config["local_provider"],
-                    base_url=self.config["local_base_url"]
-                )
+                self.provider = LocalLLMProvider({
+                    "provider_type": "local",
+                    "local_provider": self.config["local_provider"],
+                    "local_base_url": self.config["local_base_url"]
+                })
                 self.logger.info(f"Инициализирован локальный провайдер: {self.config['local_provider']}")
             except Exception:
                 self.logger.error("Не удалось инициализировать LocalLLMProvider")

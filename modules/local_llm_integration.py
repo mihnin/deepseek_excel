@@ -294,6 +294,7 @@ class LocalLLMProvider:
         return self._check_availability()
 
 # Класс для объединения локальных и удаленных LLM в едином интерфейсе
+class UnifiedLLMProvider:
     """
     Универсальный класс для работы с различными LLM - как локальными, так и облачными.
     Позволяет легко переключаться между разными провайдерами.
@@ -483,7 +484,10 @@ class LocalLLMProvider:
 # Пример использования:
 if __name__ == "__main__":
     # Пример для тестирования с локальной моделью Ollama
-    llm_provider = LocalLLMProvider(provider="ollama", base_url="http://localhost:11434")
+    llm_provider = LocalLLMProvider(
+        provider="ollama",
+        base_url="http://localhost:11434"
+    )
     
     if llm_provider.is_available:
         print("Доступные модели:", llm_provider.get_available_models())
