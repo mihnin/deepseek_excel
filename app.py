@@ -141,6 +141,7 @@ def analyze_full_table(df, llm_provider, prompt, settings, context_files=None):
     # Запрос к провайдеру LLM
     model = settings.get("model", settings.get("local_model", "llama2"))  # Безопасно получаем модель
     params = {
+        "model": model,  # Добавляем модель в словарь параметров
         "temperature": settings.get("temperature", 0.7),
         "max_tokens": settings.get("max_tokens", 300),
         "top_p": settings.get("top_p", 1.0),
@@ -150,7 +151,6 @@ def analyze_full_table(df, llm_provider, prompt, settings, context_files=None):
     
     return llm_provider.chat_completion(
         messages=messages,
-        model=model,
         **params
     )
 
@@ -701,7 +701,6 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
                     # Запрос к LLM-провайдеру
                     response, error = llm_provider.chat_completion(
                         messages=messages,
-                        model=model,
                         **model_params
                     )
                     
@@ -753,9 +752,22 @@ def process_full_table(df, llm_provider, llm_settings, focus_columns, context_fi
     try:
         with st.spinner("Выполняется анализ всей таблицы... Это может занять несколько минут."):
             # Подготовка параметров для анализа всей таблицы
-            table_model_params = llm_settings.copy()
-            table_model_params["max_tokens"] = max(1500, llm_settings["max_tokens"])  # Увеличиваем для анализа таблицы
-            table_model_params["model"] = llm_settings["model"]  # Добавляем ключ "model" в параметры
+            table_model_params = {}
+            # Если llm_settings - это словарь, копируем из него значения
+            if isinstance(llm_settings, dict):
+                table_model_params = llm_settings.copy()
+                # Увеличиваем max_tokens для анализа всей таблицы
+                table_model_params["max_tokens"] = max(1500, llm_settings.get("max_tokens", 300))
+            else:
+                # Создаем параметры по умолчанию
+                table_model_params = {
+                    "model": "llama2",
+                    "temperature": 0.7,
+                    "max_tokens": 1500,
+                    "top_p": 1.0,
+                    "frequency_penalty": 0.0,
+                    "presence_penalty": 0.0
+                }
             
             # Подготовка промпта для всей таблицы
             focus_text = ""
@@ -890,7 +902,6 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
                 # Запрос к LLM-провайдеру
                 response, error = llm_provider.chat_completion(
                     messages=messages,
-                    model=table_model_params["model"],
                     **table_model_params
                 )
                 
@@ -932,7 +943,6 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
                 # Запрос к LLM-провайдеру
                 response, error = llm_provider.chat_completion(
                     messages=messages,
-                    model=table_model_params["model"],
                     **table_model_params
                 )
                 

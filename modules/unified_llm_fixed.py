@@ -2,9 +2,26 @@
 import logging
 from typing import Dict, List, Tuple, Optional, Any, Union
 
-from .local_llm_integration import LocalLLMProvider
-from .llm_integration import LLMServiceProvider
-from .xinference_integration import XInferenceIntegration
+# Добавляем необходимые модули и обработку ошибок
+try:
+    from .local_llm_integration import LocalLLMProvider
+    from .llm_integration import LLMServiceProvider
+    from .xinference_integration import XInferenceIntegration
+except ImportError as e:
+    logging.error(f"Ошибка импорта модулей LLM: {e}")
+    
+    # Заглушки на случай отсутствия модулей
+    class LocalLLMProvider:
+        def __init__(self, **kwargs):
+            raise ImportError("Модуль local_llm_integration недоступен")
+            
+    class LLMServiceProvider:
+        def __init__(self, **kwargs):
+            raise ImportError("Модуль llm_integration недоступен. Требуется: pip install openai")
+            
+    class XInferenceIntegration:
+        def __init__(self, **kwargs):
+            raise ImportError("Модуль xinference_integration недоступен")
 
 class UnifiedLLM:
     """
