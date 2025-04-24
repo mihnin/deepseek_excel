@@ -158,10 +158,12 @@ class UnifiedLLM:
             if self.config["provider_type"] == "cloud":
                 model = "deepseek-chat"
             else:
+                # Используем дефолтную модель для локального провайдера
+                # Для lmstudio и других провайдеров используем их указанную модель
                 if self.config["local_provider"] == "ollama":
                     model = "llama2"
-                else:
-                    model = "local_model"
+                # Не используем "local_model" для других провайдеров, 
+                # вместо этого должен использоваться фактический выбранный пользователем model
         
         try:
             return self.provider.chat_completion(

@@ -83,7 +83,8 @@ def get_unified_llm_provider(settings):
             "cloud_api_key": settings.get("api_key", ""),  # Безопасно получаем api_key, используя пустую строку как значение по умолчанию
             "cloud_base_url": base_url,
             "local_provider": settings.get("local_provider", "ollama"),  # Добавляем значение по умолчанию
-            "local_base_url": settings.get("local_base_url", "http://localhost:11434")  # Добавляем значение по умолчанию
+            "local_base_url": settings.get("local_base_url", "http://localhost:11434"),  # Добавляем значение по умолчанию
+            "local_model": settings.get("local_model", "llama2")  # Добавляем модель для локального провайдера
         })
     except ImportError as e:
         st.error(f"Ошибка импорта модулей: {e}")
@@ -138,16 +139,29 @@ def analyze_full_table(df, llm_provider, prompt, settings, context_files=None):
         """}
     ]
     
-    # Запрос к провайдеру LLM
-    model = settings.get("model", settings.get("local_model", "llama2"))  # Безопасно получаем модель
-    params = {
-        "model": model,  # Добавляем модель в словарь параметров
-        "temperature": settings.get("temperature", 0.7),
-        "max_tokens": settings.get("max_tokens", 300),
-        "top_p": settings.get("top_p", 1.0),
-        "frequency_penalty": settings.get("frequency_penalty", 0.0),
-        "presence_penalty": settings.get("presence_penalty", 0.0)
-    }
+    # Используем параметры из settings, проверяя их наличие
+    if isinstance(settings, dict):
+        # Явно передаем параметры, сохраняя model в неизменном виде
+        params = {
+            "temperature": settings.get("temperature", 0.7),
+            "max_tokens": settings.get("max_tokens", 300),
+            "top_p": settings.get("top_p", 1.0),
+            "frequency_penalty": settings.get("frequency_penalty", 0.0),
+            "presence_penalty": settings.get("presence_penalty", 0.0)
+        }
+        
+        # Добавляем model только если он присутствует в settings
+        if "model" in settings:
+            params["model"] = settings["model"]
+    else:
+        # Дефолтные параметры в случае, если settings не словарь
+        params = {
+            "temperature": 0.7,
+            "max_tokens": 300,
+            "top_p": 1.0,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0
+        }
     
     return llm_provider.chat_completion(
         messages=messages,
@@ -636,6 +650,7 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
         # Получаем параметры модели из настроек
         model = llm_settings.get("model", llm_settings.get("local_model", "llama2"))  # Безопасно получаем модель
         model_params = {
+            "model": model,  # Убедимся, что передаем модель в параметрах
             "temperature": llm_settings.get("temperature", 0.7),
             "max_tokens": llm_settings.get("max_tokens", 300),
             "top_p": llm_settings.get("top_p", 1.0),
@@ -752,12 +767,18 @@ def process_full_table(df, llm_provider, llm_settings, focus_columns, context_fi
     try:
         with st.spinner("Выполняется анализ всей таблицы... Это может занять несколько минут."):
             # Подготовка параметров для анализа всей таблицы
-            table_model_params = {}
             # Если llm_settings - это словарь, копируем из него значения
             if isinstance(llm_settings, dict):
-                table_model_params = llm_settings.copy()
-                # Увеличиваем max_tokens для анализа всей таблицы
-                table_model_params["max_tokens"] = max(1500, llm_settings.get("max_tokens", 300))
+                # Получаем параметры модели из настроек
+                model = llm_settings.get("model", llm_settings.get("local_model", "llama2"))  # Безопасно получаем модель
+                table_model_params = {
+                    "model": model,  # Явно указываем модель
+                    "temperature": llm_settings.get("temperature", 0.7),
+                    "max_tokens": max(1500, llm_settings.get("max_tokens", 300)),  # Увеличиваем max_tokens для анализа всей таблицы
+                    "top_p": llm_settings.get("top_p", 1.0),
+                    "frequency_penalty": llm_settings.get("frequency_penalty", 0.0),
+                    "presence_penalty": llm_settings.get("presence_penalty", 0.0)
+                }
             else:
                 # Создаем параметры по умолчанию
                 table_model_params = {
@@ -822,7 +843,9 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         result_df[result_col] = ""
         
         # Получаем параметры модели из настроек
+        model = llm_settings.get("model", llm_settings.get("local_model", "llama2"))  # Безопасно получаем модель
         model_params = {
+            "model": model,  # Явно указываем модель
             "temperature": llm_settings.get("temperature", 0.7),
             "max_tokens": llm_settings.get("max_tokens", 300),
             "top_p": llm_settings.get("top_p", 1.0),
@@ -833,7 +856,7 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         # Параметры для анализа всей таблицы (увеличенное max_tokens)
         table_model_params = model_params.copy()
         table_model_params["max_tokens"] = max(1500, model_params["max_tokens"])
-        table_model_params["model"] = llm_settings.get("model", llm_settings.get("local_model", "llama2"))  # Безопасно получаем модель
+        # Не нужно добавлять model снова, он уже есть в model_params и был скопирован
         
         # Подготовка контекстных файлов, если есть
         file_processor = FileProcessor()
