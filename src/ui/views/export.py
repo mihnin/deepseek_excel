@@ -1,6 +1,6 @@
 # ui/export_view.py
 import streamlit as st
-from modules.excel_handler import ExcelHandler  # Изменено с export_utils.py
+from src.core.excel_handler import ExcelHandler  # Изменено с export_utils.py
 from datetime import datetime
 
 def render_export_ui(df, table_analysis=None):

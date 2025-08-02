@@ -1,7 +1,7 @@
 import requests
 import json
-from .llm_integration import LLMIntegrationInterface
-from utils.config_manager import ConfigManager
+from .cloud_provider import LLMIntegrationInterface
+from src.config.manager import ConfigManager
 
 class XInferenceIntegration(LLMIntegrationInterface):
     """

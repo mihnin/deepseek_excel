@@ -2,9 +2,26 @@
 import logging
 from typing import Dict, List, Tuple, Optional, Any, Union
 
-from .local_llm_integration import LocalLLMProvider
-from .llm_integration import LLMServiceProvider
-from .xinference_integration import XInferenceIntegration
+# Добавляем необходимые модули и обработку ошибок
+try:
+    from .local_provider import LocalLLMProvider
+    from .cloud_provider import LLMServiceProvider
+    from .xinference_provider import XInferenceIntegration
+except ImportError as e:
+    logging.error(f"Ошибка импорта модулей LLM: {e}")
+    
+    # Заглушки на случай отсутствия модулей
+    class LocalLLMProvider:
+        def __init__(self, **kwargs):
+            raise ImportError("Модуль local_llm_integration недоступен")
+            
+    class LLMServiceProvider:
+        def __init__(self, **kwargs):
+            raise ImportError("Модуль llm_integration недоступен. Требуется: pip install openai")
+            
+    class XInferenceIntegration:
+        def __init__(self, **kwargs):
+            raise ImportError("Модуль xinference_integration недоступен")
 
 class UnifiedLLM:
     """
@@ -141,10 +158,12 @@ class UnifiedLLM:
             if self.config["provider_type"] == "cloud":
                 model = "deepseek-chat"
             else:
+                # Используем дефолтную модель для локального провайдера
+                # Для lmstudio и других провайдеров используем их указанную модель
                 if self.config["local_provider"] == "ollama":
                     model = "llama2"
-                else:
-                    model = "local_model"
+                # Не используем "local_model" для других провайдеров, 
+                # вместо этого должен использоваться фактический выбранный пользователем model
         
         try:
             return self.provider.chat_completion(

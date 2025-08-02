@@ -1,7 +1,7 @@
 # ui/visualization_view.py
 
 import streamlit as st
-from modules.visualization import DataVisualizer
+from src.services.visualization import DataVisualizer
 
 def display_visualizations(df, result_column):
     """Отображает визуализации для результатов анализа"""

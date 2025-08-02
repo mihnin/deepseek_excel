@@ -31,12 +31,12 @@ logger = logging.getLogger(__name__)
 logger.info("Логирование настроено с кодировкой UTF-8 для файла.")
 
 # Импорт модулей приложения
-from modules.excel_handler import ExcelHandler
-from modules.file_utils import FileProcessor
-from modules.prompt_library import get_business_prompts, customize_prompt
-from ui.llm_settings_view import llm_settings_ui
-from utils.profile_manager import ProfileManager
-from utils.config_manager import ConfigManager
+from src.core.excel_handler import ExcelHandler
+from src.core.file_processor import FileProcessor
+from src.services.prompt_library import get_business_prompts, customize_prompt
+from src.ui.views.llm_settings import llm_settings_ui
+from src.config.profile_manager import ProfileManager
+from src.config.manager import ConfigManager
 
 # Кэширование загрузки Excel-файла
 @st.cache_data
@@ -67,7 +67,7 @@ def get_unified_llm_provider(settings):
     """
     
     try:
-        from modules.unified_llm_fixed import UnifiedLLM as UnifiedLLMProvider
+        from src.llm.unified_provider import UnifiedLLM as UnifiedLLMProvider
         # Проверяем наличие и валидность API ключа
         if settings["provider_type"] == "cloud" and not settings.get("api_key"):
             st.error("API ключ не указан для облачного провайдера")
@@ -251,13 +251,13 @@ def main():
     # Обновляем session_state при изменении radio
     if selected_tab == "1. Загрузка данных" and st.session_state.get("active_tab") != "tab1":
         st.session_state["active_tab"] = "tab1"
-        st.rerun()
+        st.experimental_rerun()
     elif selected_tab == "2. Настройка анализа" and st.session_state.get("active_tab") != "tab2":
         st.session_state["active_tab"] = "tab2" 
-        st.rerun()
+        st.experimental_rerun()
     elif selected_tab == "3. Результаты" and st.session_state.get("active_tab") != "tab3":
         st.session_state["active_tab"] = "tab3"
-        st.rerun()
+        st.experimental_rerun()
 
     # ======================== Вкладка 1: Загрузка данных ========================
     if st.session_state.get("active_tab") == "tab1" or selected_tab == "1. Загрузка данных":
@@ -334,7 +334,7 @@ def main():
                 # Добавляем прямую запись в session_state
                 st.session_state["active_tab"] = "tab2"
                 # Используем актуальный метод rerun
-                st.rerun()
+                st.experimental_rerun()
 
     # ======================== Вкладка 2: Настройка анализа ========================
     elif st.session_state.get("active_tab") == "tab2" or selected_tab == "2. Настройка анализа":
@@ -750,7 +750,7 @@ def process_row_by_row(df, llm_provider, llm_settings, target_column, additional
         
         # Переходим к вкладке с результатами
         st.session_state["active_tab"] = "tab3"
-        st.rerun()
+        st.experimental_rerun()
         
         return result_df # Возвращаем DataFrame с результатами
     
@@ -824,7 +824,7 @@ def process_full_table(df, llm_provider, llm_settings, focus_columns, context_fi
                 
                 # Переходим к вкладке с результатами
                 st.session_state["active_tab"] = "tab3"
-                st.rerun()
+                st.experimental_rerun()
     
     except Exception as e:
         st.error(f"Произошла ошибка при выполнении анализа всей таблицы: {e}")
@@ -1017,7 +1017,7 @@ def process_combined_analysis(df, llm_provider, llm_settings, target_column, add
         
         # Переходим к вкладке с результатами
         st.session_state["active_tab"] = "tab3"
-        st.rerun()
+        st.experimental_rerun()
     
     except Exception as e:
         st.error(f"Произошла ошибка при выполнении комбинированного анализа: {e}")

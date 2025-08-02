@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, List, Tuple, Optional, Any
 from openai import OpenAI
-from modules.api_utils import APIUtils
+from src.services.api_utils import APIUtils
 from abc import ABC, abstractmethod
 
 

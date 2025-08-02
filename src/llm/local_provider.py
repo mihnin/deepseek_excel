@@ -45,7 +45,8 @@ class LocalLLMProvider:
                 response = requests.get(f"{self.base_url}/api/tags", timeout=5)
                 return response.status_code == 200
             elif self.provider == "lmstudio":
-                response = requests.get(f"{self.base_url}/v1/models", timeout=5)
+                # LM Studio URL уже содержит /v1
+                response = requests.get(f"{self.base_url}/models", timeout=5)
                 return response.status_code == 200
             elif self.provider == "textgen_webui":
                 response = requests.get(f"{self.base_url}/v1/models", timeout=5)
@@ -76,7 +77,8 @@ class LocalLLMProvider:
                     return [{"id": model["name"], "name": model["name"]} for model in models_data]
             
             elif self.provider in ["lmstudio", "textgen_webui"]:
-                response = requests.get(f"{self.base_url}/v1/models", timeout=self.timeout)
+                # URL уже содержит /v1 для этих провайдеров
+                response = requests.get(f"{self.base_url}/models", timeout=self.timeout)
                 if response.status_code == 200:
                     models_data = response.json().get("data", [])
                     return [{"id": model["id"], "name": model["id"]} for model in models_data]
@@ -231,8 +233,9 @@ class LocalLLMProvider:
             "stream": False
         }
         
+        # URL уже содержит /v1 для lmstudio и textgen_webui
         response = requests.post(
-            f"{self.base_url}/v1/chat/completions",
+            f"{self.base_url}/chat/completions",
             json=payload,
             timeout=self.timeout
         )

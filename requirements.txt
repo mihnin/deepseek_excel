@@ -5,39 +5,21 @@ numpy
 openpyxl
 openai
 
-# Обработка данных
-scikit-learn
-nltk
-pymorphy2  # Для морфологического анализа русского языка
-langdetect  # Определение языка текста
-
 # Визуализация
 matplotlib
 plotly
-altair
-seaborn
 
 # Дополнительные компоненты Streamlit
 streamlit-extras  # Дополнительные компоненты для Streamlit
-streamlit-aggrid  # Продвинутые таблицы
-streamlit-option-menu  # Меню опций
 
 # Обработка файлов
-python-docx # Работа с документами Word
-PyPDF2  # Работа с PDF
-# Заменяем textract на более стабильный вариант
-extract-msg  # Извлечение текста из MSG файлов
-pdfminer.six  # Альтернатива для работы с PDF
-python-pptx  # Для работы с PowerPoint файлами
+python-docx==0.8.11  # Работа с документами Word
 
-# Кэширование и оптимизация
-joblib
-cachetools
+# Планировщик задач
+schedule
 
-# Логирование и отладка
-loguru
+# Работа с запросами (для локальных LLM)
+requests
 
-# Сохранение настроек
-toml
-pyyaml
-python-docx==0.8.11
+# Для сохранения JSON конфигураций
+json5

@@ -41,7 +41,7 @@ def llm_settings_ui() -> Dict[str, Any]:
                 del st.session_state["available_models"]
             if "available_local_models" in st.session_state:
                 del st.session_state["available_local_models"]
-            st.rerun() # Перезапускаем для обновления интерфейса
+            st.experimental_rerun() # Перезапускаем для обновления интерфейса
 
         # Настройки в зависимости от типа провайдера
         if st.session_state.get("provider_type") == "cloud":
@@ -72,7 +72,7 @@ def llm_settings_ui() -> Dict[str, Any]:
                 else:
                     try:
                         # Инициализируем провайдер для проверки
-                        from modules.llm_integration import LLMServiceProvider
+                        from src.llm.cloud_provider import LLMServiceProvider
                         llm_service = LLMServiceProvider(api_key=api_key_value, base_url=base_url_value)
 
                         # Получаем список моделей - это проверит соединение
@@ -130,7 +130,7 @@ def llm_settings_ui() -> Dict[str, Any]:
                 # Сбрасываем список моделей
                 if "available_local_models" in st.session_state:
                     del st.session_state["available_local_models"]
-                st.rerun()
+                st.experimental_rerun()
 
 
             # Базовый URL в зависимости от провайдера
@@ -157,7 +157,7 @@ def llm_settings_ui() -> Dict[str, Any]:
                 provider_key = st.session_state.get("local_provider")
                 base_url_value = st.session_state.get("local_base_url")
                 try:                    # Импортируем класс для работы с локальными моделями
-                    from modules.local_llm_integration import LocalLLMProvider
+                    from src.llm.local_provider import LocalLLMProvider
                     
                     # Инициализируем провайдер с правильными параметрами
                     local_llm = LocalLLMProvider(
@@ -311,7 +311,7 @@ def llm_settings_ui() -> Dict[str, Any]:
                 with open(LOG_FILE_PATH, "w", encoding='utf-8') as f:
                     f.write("") # Перезаписываем файл пустым содержимым
                 st.success("Лог-файл успешно очищен.")
-                st.rerun() # Используем st.rerun() для обновления интерфейса
+                st.experimental_rerun() # Используем st.experimental_rerun() для обновления интерфейса
             except Exception as e:
                 st.error(f"Не удалось очистить лог-файл: {e}")
 

@@ -15,7 +15,7 @@ def navigate_to_tab(tab_name):
     st.query_params["tab"] = tab_name
     
     # Перезагрузка приложения для применения изменений
-    st.rerun()
+    st.experimental_rerun()
 
 def get_active_tab_from_url():
     """
