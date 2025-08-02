@@ -1,8 +1,8 @@
 # Claude AI specific
 .claude/
-docs/
-CLAUDE.md
-*.txt
+# docs/ - не игнорируем документацию
+# CLAUDE.md - не игнорируем инструкции для Claude
+# *.txt - комментируем, так как requirements.txt нужен
 
 # Python
 __pycache__/
